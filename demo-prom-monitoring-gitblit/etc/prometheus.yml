@@ -1,0 +1,26 @@
+global:
+  scrape_interval:     1s
+  evaluation_interval: 1s
+
+  external_labels:
+      monitor: 'prom-demo'
+
+rule_files:
+  - '/etc/prometheus/alert-http-latency.rules.yml'
+
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  - job_name: 'gitblit'
+    metrics_path: '/prometheus'
+    static_configs:
+      - targets: ['gitblit1:8080','gitblit2:8080']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+

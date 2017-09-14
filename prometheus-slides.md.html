@@ -1,0 +1,604 @@
+<html>
+  <head>
+    <title>Dynamic Infrastructure and Container Monitoring with PROMETHEUS</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+      @page {
+        size: 1210px 681px;
+        margin: 5%;
+      }
+      
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      }
+    
+      body { 
+        font-family: 'Droid Serif';
+        margin: 0px;
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+        color: #061106;
+      }
+      
+      img {
+          max-width: 85%;
+      }
+
+
+      h1 {
+          border-bottom: 1px solid black;
+      }
+
+      /* Two-column layout */
+      .left-column {
+          width: 50%;
+          float: left;
+      }
+      .right-column {
+          width: 49%;
+          float: right;
+          padding-top: 0em;
+          margin-top: 0em;
+          text-align: left;
+      }
+
+        table {
+            width: 90%;
+            border-top: 1px solid #e5eff8;
+            border-right: 1px solid #e5eff8;
+            margin: 1em auto;
+            border-collapse: collapse;
+        }
+
+        td {
+            color: #678197;
+            border-bottom: 1px solid #e5eff8;
+            border-left: 1px solid #e5eff8;
+            padding: .3em 1em;
+            text-align: center;
+        }
+
+        tr.odd td {
+            background: #f7fbff
+        }
+
+        tr.odd .column1 {
+            background: #f4f9fe;
+        }
+
+        .column1 {
+            background: #f9fcfe;
+        }
+
+        thead th {
+            background: #f4f9fe;
+            text-align: center;
+            font: bold 1.2em/2em "Century Gothic", "Trebuchet MS", Arial, Helvetica, sans-serif;
+            color: #66a3d3;
+        }
+
+      ol {
+          padding: 0 0 0 1.5em;
+          margin: 1em 0;
+      }
+      
+      ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+      }
+
+      li {
+          padding-left: 1em;
+          padding-top: 0.5em;
+      }
+
+      ul li ul li  {
+          padding-left: 2em;
+          padding-top: 0.25em;
+      }
+
+
+      li:before {
+          content: "\25cf";
+          display: inline-block;
+          width: 1.5rem;
+      }
+
+      .remark-code, .remark-inline-code { 
+        font-family: 'Ubuntu Mono'; 
+        font-size: 27px;
+      }
+      blockquote {
+          border-left: 5px solid #cccccc;
+          padding-left: 1em;
+          margin: 1em -2em;
+          font-style: italic;
+          color: #999999;
+      }
+      
+      .remark-slide-number {
+          display: none;
+      }
+      
+      .remark-slide {
+          display: table;
+      }
+      
+      .remark-slide-content {
+          border-bottom: 50px solid #33AA99;
+          font-size: 26px;
+          padding: 0.5em 2em 0.5em 2em;
+
+      }
+
+      .remark-slide-content:after {
+          content: "";
+          position: absolute;
+          bottom: 0px;
+          right: 0px;
+          height: 50px;
+          width: 118px;
+
+      }
+      .cite {font-size: 0.8em; color:#33AA99;font-style: italic}
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      .twitter {
+              position: absolute;
+              bottom: 0.3em;
+              left: 0.5em;
+      }
+        .box {
+            border: 2px solid #000;
+            margin: 10%;
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            background-color: #ddd;
+            border-color: #aaa;
+        }
+
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+name: twitter 
+layout: true 
+
+.twitter[<a href="https://twitter.com/goettl" class="twitter-follow-button" data-show-count="false">Follow @goettl</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>] 
+---
+class: middle,center
+
+# Dynamic Infrastructure and Container Monitoring with PROMETHEUS
+.center[**Georg Öttl**]
+.center[Infracoders Meetup, 2017, Graz]
+
+???
+Monitoring solutions in Enterprise-Software architectures typically control rigid software and its components. Microservices, Container Infrastructure and so on have special requirements for monitoring solutions because of their dynamic structures. Thus, monitoring data have to be dynamically navigable, summable and interpretable for many components. Ideally you can make predictions with the usage of this data about functionality, stability and resource usage. 
+
+Prometheus, an open source Cloud-Native monitoring tool, belongs to a new generation of monitoring tools, which can meet these requirements. 
+In this talk the time series data model, architecture and the integration with Kubernetes will be demonstrated. Moreover, you will see how simple onboard functions of Prometheus can be used to detect expected and unexpected behavior. Finally this talk will cover how to export Prometheus time series and import them into data-science-tools like “R”, Python SciPy or the Microsoft Azure’s cloud machine learning services to process.
+ 
+---
+
+## About me
+
+.left-column[
+* Enterprise Software dev
+* Data Science Services
+* Dev / DevOps / Ops
+* Developer who likes Math
+]
+.right-column[
+![image](img/me.jpg)
+
+.box[Twitter: @goettl]
+] 
+---
+
+## Overview
+
+* Monitoring 
+* Prometheus by example 
+ * DevOps demo, scaling Gitblit 
+* Analyze Prometheus metrics like a data scientist
+
+  
+---
+
+class: middle, left
+# Monitoring
+ 
+ 
+---
+
+## Why is monitoring a DevOps topic?
+
+
+* Check functionality / performance 
+* Analyse behavior
+* Insight how software works
+* Trend analytics / resources
+
+<br><br>
+.center[.box[You build it you run it!]]
+
+ 
+
+---
+
+## Metrics, tracing, logging?
+.center[![image](img/metrics_tracing_logging.png)]
+
+.footnote[[Blog Peter Bourgon - Metrics, Tracing and Logging](https://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html)]
+
+ 
+---
+
+## Well known monitoring tools
+
+* Nagios, Check_Mk
+* Opentsb, Graphite
+* Influxdb + Kapacitor (Similar to Prometheus)
+* Elasticsearch + Logstash + Kibana + ...
+* ...
+
+.center[**Hard to use in a DevOps stack **]
+ 
+ 
+---
+
+## Rule #1
+
+.box[**"Spend more time working on code that analyzes the meaning of
+metrics, than code that collects, moves, stores and displays 
+metrics"**, Adrian Cockroft]
+
+    
+ 
+---
+
+class: middle, left
+# Prometheus by example
+
+ 
+ 
+---
+
+## Demo: app scenario scaling Gitblit
+
+.center[![image](img/demo_setup.png)]
+
+ 
+---
+
+## Demo: exporter / endpoint (Gitblit) 
+```
+...
+# TYPE jvm_memory_pool_bytes_max gauge
+jvm_memory_pool_bytes_max{pool="Code Cache",} 2.5165824E8
+jvm_memory_pool_bytes_max{pool="Metaspace",} -1.0
+jvm_memory_pool_bytes_max{pool="Compressed Class Space",} 1.073741824E9
+jvm_memory_pool_bytes_max{pool="PS Eden Space",} 1.320157184E9
+jvm_memory_pool_bytes_max{pool="PS Survivor Space",} 3.670016E7
+jvm_memory_pool_bytes_max{pool="PS Old Gen",} 2.793406464E9
+# HELP log4j_appender_total Log4j log statements at various log levels
+# TYPE log4j_appender_total counter
+log4j_appender_total{level="debug",} 0.0
+log4j_appender_total{level="warn",} 4.0
+log4j_appender_total{level="trace",} 0.0
+log4j_appender_total{level="error",} 1034.0
+log4j_appender_total{level="fatal",} 0.0
+log4j_appender_total{level="info",} 6049.0
+...
+```
+ 
+ 
+---
+
+## Demo: Prometheus out of the box functionality
+
+* Scrape raw metrics
+* Persist metrics
+* Navigate data / promql
+* Visualisation
+ 
+ 
+---
+
+## Demo: Prometheus advanced vis + navigation
+
+* Grafana dashboards
+* Navigation with labels
+
+ 
+---
+
+## Demo: monitoring as part of development  
+
+* Monitoring for verification of load tests
+ * Tests should trigger similar load to production
+ * DevOps is the best way to get high quality data
+* Alertmanager as Assert.that
+
+???
+* Verifikation von Performance Tests: Lasten meine Performance Tests das System tatsächlich aus?
+* Was ist noch möglich: Entwickler definiert Metrik (Variable) als Teil eines Tests
+
+ 
+---
+
+## Demo: the admin part of Prometheus
+
+* Prometheus time series database
+* Integration to existing monitoring solutions
+* How to scale Prometheus
+* 11 integrations to container orchestrators (k8s, marathon, dns, ... )
+      
+       
+---
+
+class: middle, left
+# Whitebox instrumentation in Java 
+ 
+ 
+---
+
+## How to do whitebox monitoring so far
+<br>
+ * Json / CSV / SQL View, ...
+ * JMX
+ * Libraries with hooks push (e.g. datadog, ...  ) 
+ 
+---
+
+## Prometheus client instrumentation, example Gitblit
+
+* Client instrumentation
+* Default metrics for Log4j
+* Default metrics für JDK
+* Custom Metric for git garbage collection, ldap sync
+
+ 
+---
+
+## Prometheus client Metrics HTTP / Servlet
+
+.center[Gitblit Servlet / Guice WebModule konfigurieren]
+
+```java
+bind(MetricsServlet.class).in(Scopes.SINGLETON);
+serve("/Prometheus").with(MetricsServlet.class);
+```
+.center[... that's it ...]
+
+
+---
+
+## Prometheus client Metrics JDK
+
+.center[Register default JDK Metrics]
+```java
+DefaultExports.initialize();
+```
+.center[... that's it ...]
+
+---
+
+## Client Metriken Log4j
+.center[Instrumen Logger / Log4j ]
+
+```properties
+log4j.rootCategory=INFO, S, METRICS
+
+...
+
+log4j.appender.METRICS = io.Prometheus.client.log4j.InstrumentedAppender
+log4j.appender.METRICS.Append = false
+```
+.center[... that's it ...]
+
+---
+
+## Custom Metrics
+```java
+private final Counter garbageCollectsTotal = Counter.build()
+        .name("GIT_GARBAGE_COLLECTS_TOTAL")
+        .help("Number of git garbage collects issued by giblit for a repository")
+        .register();
+...
+garbageCollectsTotal.inc();
+
+```
+.center[... that's it ...]
+
+---
+
+## What did we see?
+
+.box[**Whitebox monitoring won't 
+work without Developers!**]
+
+ 
+---
+
+class: middle, left
+# Analyze Prometheus Metrics Like a Data Scientist
+ 
+---
+
+# ... should I?
+
+.box[**Don't use deep learning and datasience when a
+ straight-forward 15 minute rule-based system does well.**]
+
+
+.box[Datascience can help you to detect patterns and facts in your
+metrics you can't see.]
+
+ 
+---
+
+# What is already available
+
+* Great architecture to get high quality data
+* Numerical data
+ * Apply mathematical functions on it 
+* Easy and fast navigable  (promql)
+* Alert / rule model
+* Chart / histogram vis with Grafana
+ 
+ 
+---
+
+# When do I start?
+
+.box[Already working alerts /
+        dashboards you want to improve]
+
+ 
+---
+
+# Two ways to get data out of prometheus
+
+* **HTTP API (Poll)**
+ * Exploratory data analysis
+* REMOTE API (Push)
+ * Streaming analysis 
+ 
+  
+  
+---
+
+# HTTP API - /api/v1/query_range
+
+
+```  python
+requests.get(
+  url = 'http://127.0.0.1:9090/api/v1/query_range',  
+  params = {
+    'query': 'sum({__name__=~".+"})  by (__name__,instance)', 
+    'start': '1502809554', 
+    'end'  : '1502839554', 
+    'step' : '1m'
+  })   
+ 
+{"data": {...,  "resultType": "matrix",
+"result": [{
+  "metric": {"method": "GET",...},
+  "values": [[1500008340,"3"], ... ]},...]
+}}
+```
+ 
+ 
+---
+
+# Normalize prometheus datatypes
+
+* Gauges, histograms are ok
+* Counters have to be processed
+ * No repetition in counters. No statistical value in that.
+ * Use e.g derivative function to convert a counter to a gauge equivalent
+
+
+---
+
+# Example 1 
+
+.box[I can predict the 
+latency of http requests]
+
+* Can I use the prometheus function predict_linear? 
+* Are there other predictions possible?
+ 
+&Darr;&Darr; <a href="./predict_linear.nb.html" target="_blank">R Notebook predict_linear</a>&Darr;&Darr;
+         
+          
+---
+
+
+## Histogramme, Monitoring for the long tail
+
+``` postgresql
+histogram_quantile(0.99, 
+ sum(
+  rate(
+   http_request_duration_seconds_bucket{method="GET"}[1m]
+  )
+ ) by (le))
+```
+ 
+---
+
+
+## Outliers Detection Algorithms 
+
+.center[![image](./img/anomaly_detection.png)]
+.footnote[https://github.com/twitter/AnomalyDetection]
+
+---
+
+## Demo export from grafana
+
+* Demo API
+* Export into csv
+  
+ 
+---
+
+class: middle, center
+# Thx for having me here at infracoders meetup 2017!
+
+        Questions?
+        
+
+.box[
+Georg Öttl
+<br> Twitter Handle: **@goettl**]
+
+
+
+
+    </textarea>
+    <script src="remark-latest.min.js"></script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+    <script>window.twttr = (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+      if (d.getElementById(id)) return t;
+      js = d.createElement(s);
+      js.id = id;
+      js.src = "https://platform.twitter.com/widgets.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    
+      t._e = [];
+      t.ready = function(f) {
+        t._e.push(f);
+      };
+    
+      return t;
+    }(document, "script", "twitter-wjs"));</script>
+  </body>
+</html>
+
+

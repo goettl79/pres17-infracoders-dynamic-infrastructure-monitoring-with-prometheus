@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+
+  tasks:
+  - lineinfile:
+      path: "/etc/hosts"
+      line: "{{item}}"
+    become: True
+    with_items:
+      - "#### Start Hosts for infralovers.com demo"
+      - "127.0.0.1 gitblit.infralovers.com"
+      - "127.0.0.1 prometheus.infralovers.com"
+      - "127.0.0.1 prometheus-data.infralovers.com"
+      - "127.0.0.1 prometheus-am.infralovers.com"
+      - "127.0.0.1 grafana.infralovers.com"
+      - "#### End Hosts for infralovers.com demo"

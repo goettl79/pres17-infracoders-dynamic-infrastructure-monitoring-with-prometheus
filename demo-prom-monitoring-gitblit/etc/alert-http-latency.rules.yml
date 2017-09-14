@@ -1,0 +1,11 @@
+groups:
+- name: demo-prom-monitoring-gitblit/etc/alert-http-latency.rules
+  rules:
+  - alert: Http5xErrors
+    expr: rate(http_requests_total{status=~"^(?:5.*)$"}[1m]) > 0
+    labels:
+      severity: critical
+  - alert: DOS
+    expr: rate(http_requests_total[1m]) > 4
+    labels:
+      severity: critical
