@@ -19,8 +19,8 @@ As I'm always appreciating feedback please
 
 ```
 # Setup environment 
-git clone https://github.com/goettl79/devops-with-prometheus.git
-cd devops-with-prometheus/demo-prom-monitoring-gitblit
+git clone https://github.com/goettl79/pres17-infracoders-dynamic-infrastructure-monitoring-with-prometheus.git
+cd pres17-infracoders-dynamic-infrastructure-monitoring-with-prometheus/demo-prom-monitoring-gitblit
 ansible-playbook playbook-local-host-setup.yml #adds necessary host entries to your /etc/hosts file
 docker-compose up
 
