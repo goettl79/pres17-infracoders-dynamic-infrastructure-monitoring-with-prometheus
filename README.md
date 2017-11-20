@@ -27,8 +27,9 @@ mvn install  test -f ../demo-prom-monitoring-gitblit/pom.xml
 ```
 
 ## Slides
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/BwMVAwFgpCIiCV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/GeorgOettl/dynamic-infrastructure-and-container-monitoring-with-prometheus" title="Dynamic Infrastructure and Container Monitoring with Prometheus" target="_blank">Dynamic Infrastructure and Container Monitoring with Prometheus</a> </strong> from <strong><a href="https://www.slideshare.net/GeorgOettl" target="_blank">Georg Öttl</a></strong> </div>
 
 <br>
 <a href="./prometheus-slides.md.html" target="_blank" type="text/html">
-<b>Slides Orig, Happy DevOps!</b></a> 
+<b>Slides Source, Happy DevOps!</b></a> 
    
